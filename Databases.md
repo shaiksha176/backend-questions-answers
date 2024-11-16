@@ -202,6 +202,7 @@ PUT and PATCH are both used to update resources, but they differ in their approa
 ## API Security
 
 API security is a critical aspect of designing and implementing REST APIs. Some common security measures include:
+
 - Authentication: Verifying the identity of the client making the request.
 - Authorization: Controlling access to resources based on the client's role or permissions.
 - Data Encryption: Protecting data in transit using encryption protocols like HTTPS.
@@ -214,8 +215,7 @@ API security is a critical aspect of designing and implementing REST APIs. Some 
 - SSL/TLS: Using SSL/TLS to encrypt data in transit.
 - API Keys Rotation: Regularly rotating API keys to prevent unauthorized access.
 - API Security Frameworks: Using frameworks like OWASP API Security Top 10 to identify and address
-security vulnerabilities.
-
+  security vulnerabilities.
 
 Implementing API security in an Express.js application involves several best practices and techniques to protect your API from unauthorized access and potential attacks. Here are some key strategies you can employ:
 
@@ -224,72 +224,70 @@ Implementing API security in an Express.js application involves several best pra
 Ensure that your API is served over HTTPS to encrypt data in transit, preventing man-in-the-middle attacks. You can obtain an SSL certificate from a trusted certificate authority.
 
 ### 2. Authentication
+
 Implement authentication mechanisms to verify the identity of users accessing your API. Common methods include:
 
-*   **JWT (JSON Web Tokens)**: Use JWT for stateless authentication. After a user logs in, generate a token that the client will send with each request.
+- **JWT (JSON Web Tokens)**: Use JWT for stateless authentication. After a user logs in, generate a token that the client will send with each request.
 
-``` javascript
-
-const jwt = require('jsonwebtoken');
+```javascript
+const jwt = require("jsonwebtoken");
 
 // Middleware to authenticate JWT
 function authenticateJWT(req, res, next) {
-    const token = req.header('Authorization')?.split(' ')[1];
-    if (token) {
-        jwt.verify(token, 'your_secret_key', (err, user) => {
-            if (err) {
-                return res.sendStatus(403); // Forbidden
-            }
-            req.user = user;
-            next();
-        });
-    } else {
-        res.sendStatus(401); // Unauthorized
-    }
+  const token = req.header("Authorization")?.split(" ")[1];
+  if (token) {
+    jwt.verify(token, "your_secret_key", (err, user) => {
+      if (err) {
+        return res.sendStatus(403); // Forbidden
+      }
+      req.user = user;
+      next();
+    });
+  } else {
+    res.sendStatus(401); // Unauthorized
+  }
 }
-
 ```
 
 ### 3. Authorization
+
 Ensure that users can only access resources they are permitted to. Implement role-based access control (RBAC) or other authorization mechanisms.
 
 ```javascript
 // Example of role-based access control
 function authorize(roles = []) {
-    return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.role)) {
-            return res.sendStatus(403); // Forbidden
-        }
-        next();
-    };
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.sendStatus(403); // Forbidden
+    }
+    next();
+  };
 }
 
 // Usage
-app.get('/admin', authenticateJWT, authorize(['admin']), (req, res) => {
-    res.send('Welcome Admin');
+app.get("/admin", authenticateJWT, authorize(["admin"]), (req, res) => {
+  res.send("Welcome Admin");
 });
-
 ```
 
 ### 4. Input Validation and Sanitization
 
 Validate and sanitize incoming data to prevent injection attacks (e.g., SQL injection, NoSQL injection). Use libraries like **express-validator** or **joi**
 
-
 ```javascript
-const { body, validationResult } = require('express-validator');
+const { body, validationResult } = require("express-validator");
 
-app.post('/user', [
-    body('email').isEmail(),
-    body('password').isLength({ min: 5 })
-], (req, res) => {
+app.post(
+  "/user",
+  [body("email").isEmail(), body("password").isLength({ min: 5 })],
+  (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
     // Proceed with creating the user
-});
-
+  }
+);
 ```
 
 ### 5. Rate Limiting
@@ -297,15 +295,14 @@ app.post('/user', [
 Implement rate limiting to prevent abuse and denial-of-service attacks. You can use libraries like express-rate-limit.
 
 ```javascript
-const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
 });
 
 app.use(limiter);
-
 ```
 
 ### 6. CORS (Cross-Origin Resource Sharing)
@@ -313,15 +310,15 @@ app.use(limiter);
 Configure CORS to control which origins can access your API. Use the cors middleware.
 
 ```javascript
+const cors = require("cors");
 
-const cors = require('cors');
-
-app.use(cors({
-    origin: 'https://your-frontend-domain.com', // Allow only your frontend to access the API
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
-
+app.use(
+  cors({
+    origin: "https://your-frontend-domain.com", // Allow only your frontend to access the API
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 ```
 
 ### 7. Logging and Monitoring
@@ -329,25 +326,124 @@ app.use(cors({
 Implement logging and monitoring to track API usage and detect suspicious activities. You can use libraries like morgan for logging.
 
 ```javascript
+const morgan = require("morgan");
 
-const morgan = require('morgan');
-
-app.use(morgan('combined'));
-
+app.use(morgan("combined"));
 ```
 
 ### 8. Error Handling
+
 Implement error handling to catch and handle unexpected errors. You can use a library like express-error-handler.
-
-
 
 ```javascript
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+  console.error(err.stack);
+  res.status(500).send("Something broke!");
 });
-
 ```
 
+## JSON Web Tokens
 
+JWT (JSON Web Token) is an open standard (RFC 7519) that defines a compact and self-contained way for securely transmitting information between parties as a JSON object. It is commonly used for authentication and information exchange in web applications.
 
+### Structure of JWT
+
+- Header
+- Payload
+- Signature
+
+### Why is JWT Used?
+
+1. Compactness
+   JWTs are compact in size, making them easy to transmit through URLs, HTTP headers, or cookies. This compactness is beneficial for performance and bandwidth usage.
+
+2. Self-Contained
+   JWTs carry all the necessary information about the user or session, which means that the server does not need to store session information. This self-contained nature allows for stateless authentication, making it easier to scale applications.
+
+3. Security
+   JWTs can be signed and optionally encrypted. The signing ensures that the token has not been altered, while encryption protects sensitive information. This security feature is crucial in preventing unauthorized access and data tampering.
+
+4. Interoperability
+   JWTs are based on open standards (RFC 7519), which makes them interoperable across different programming languages and platforms. This standardization allows developers to use JWTs in various environments without compatibility issues.
+
+5. Ease of Use
+   JWTs are easy to use and can be easily integrated into existing authentication systems. Many libraries and frameworks support JWT, simplifying the implementation process.
+
+6. Expiration Control
+   JWTs can include an expiration claim (exp) that defines how long the token is valid. This feature helps in managing session lifetimes and enhances security by limiting the time an attacker can use a stolen token.
+
+7. Claims-Based Authentication
+   JWTs support claims, which are statements about an entity (typically, the user) and additional data. This feature allows for rich user information to be included in the token, enabling fine-grained access control and authorization.
+
+8. Cross-Domain Authentication
+   JWTs can be used for cross-domain authentication, which is particularly useful in microservices architectures where different services may need to authenticate users across different domains.
+
+```javascript
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const bodyParser = require("body-parser");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(bodyParser.json());
+
+// Secret key for JWT
+const SECRET_KEY = "your_secret_key"; // Change this to a strong secret key
+
+// In-memory user storage (for demonstration purposes)
+let users = [];
+
+// Register route
+app.post("/register", (req, res) => {
+  const { username } = req.body;
+
+  // Check if user already exists
+  if (users.find((user) => user.username === username)) {
+    return res.status(400).send("User  already exists");
+  }
+
+  // Save user to "database"
+  users.push({ username });
+  res.status(201).send("User  registered successfully");
+});
+
+// Login route
+app.post("/login", (req, res) => {
+  const { username } = req.body;
+
+  // Check if user exists
+  const user = users.find((user) => user.username === username);
+  if (!user) {
+    return res.status(404).send("User  not found");
+  }
+
+  // Create JWT token
+  const token = jwt.sign({ username: user.username }, SECRET_KEY, {
+    expiresIn: "1h",
+  });
+  res.status(200).json({ auth: true, token });
+});
+
+// Middleware to verify token
+function verifyToken(req, res, next) {
+  const token = req.headers["x-access-token"];
+  if (!token) return res.status(403).send("No token provided");
+
+  jwt.verify(token, SECRET_KEY, (err) => {
+    if (err) return res.status(500).send("Failed to authenticate token");
+    next();
+  });
+}
+
+// Protected route
+app.get("/protected", verifyToken, (req, res) => {
+  res.status(200).send("This is a protected route.");
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+```
